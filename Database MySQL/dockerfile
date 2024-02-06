@@ -1,0 +1,22 @@
+# Utilizza l'immagine ufficiale di MySQL
+FROM mysql:8.0
+
+# Imposta la variabile d'ambiente per il nome del database
+ENV MYSQL_DATABASE BikeStores
+
+# Imposta la variabile d'ambiente per l'utente del database
+ENV MYSQL_USER admin
+
+# Imposta la variabile d'ambiente per la password dell'utente del database
+ENV MYSQL_PASSWORD password
+
+# Imposta la variabile d'ambiente per la password di root
+ENV MYSQL_ROOT_PASSWORD password_root
+
+# Aggiunge i file .sql al contenitore
+ADD ./Database/1_BikeStores_Sample_Database_-_drop_all_objects.sql /docker-entrypoint-initdb.d
+ADD ./Database/2_BikeStores_Sample_Database_-_create_objects.sql /docker-entrypoint-initdb.d
+ADD ./Database/3_BikeStores_Sample_Database_-_load_data.sql /docker-entrypoint-initdb.d
+ADD ./Database/4_Sample-SQL-File-500000-Rows.sql /docker-entrypoint-initdb.d
+
+# Quando il contenitore verrà avviato, MySQL eseguirà automaticamente i file .sql
