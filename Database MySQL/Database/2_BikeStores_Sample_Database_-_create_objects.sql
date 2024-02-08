@@ -10,9 +10,11 @@ Version: 1.0
 -- create schemas
 CREATE SCHEMA production;
 go
+-- non parte del codice SQL!
 
 CREATE SCHEMA sales;
 go
+-- non parte del codice SQL!
 
 -- create tables
 CREATE TABLE production.categories (
