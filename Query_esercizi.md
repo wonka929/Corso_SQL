@@ -86,14 +86,6 @@ Questo punto fai un join delle tabelle sull'order_id e mostra customer_id, nome,
 
 ### Identifica i prodotti che non sono mai stati venduti:
 
-```
-SELECT *
-FROM production.products
-WHERE product_id NOT IN (SELECT DISTINCT product_id FROM sales.order_items);
-```
-
-### Identifica i prodotti che non sono mai stati venduti:
-
     SELECT *
     FROM production.products
     WHERE product_id NOT IN (SELECT DISTINCT product_id FROM sales.order_items);
@@ -110,5 +102,3 @@ WHERE product_id NOT IN (SELECT DISTINCT product_id FROM sales.order_items);
     JOIN production.products p ON oi.product_id = p.product_id
     JOIN production.categories c ON p.category_id = c.category_id
     GROUP BY YEAR(o.order_date), MONTH(o.order_date), c.category_name;
-
-
