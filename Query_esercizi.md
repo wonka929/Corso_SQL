@@ -16,9 +16,36 @@ Conta il numero di customer che non hanno effettuato ordini
 
 Trova il valore totale dell'ordine:
 
-    SELECT order_id, sum(list_price)
-    from sales.order_items oi 
-    group by oi.order_id;
+    SELECT
+        order_id,
+        SUM(list_price * quantity * (1-discount)) as totale_ordine
+    from
+        sales.order_items oi
+    group by
+        oi.order_id;
+
+Trova il valore totale del fatturato seguendo i valori degli ordini:
+
+    SELECT SUM(t1.totale_ordine) from
+    (SELECT
+        SUM(list_price * quantity * (1-discount)) as totale_ordine
+    from
+        sales.order_items oi
+    group by
+        oi.order_id) as t1;
+
+## Trova il valore di sconto medio alla vendita dei vari prodotti:
+
+    SELECT ( 1 - totale_ordini / totale_listini )  
+    FROM   (SELECT Sum(t1.totale_listini) AS totale_listini  
+            FROM   (SELECT *Sum*(list_price * quantity) AS totale_listini  
+                    FROM   sales.order_items oi  
+                    GROUP  BY oi.order_id) AS t1) AS t3,  
+           (SELECT Sum(t2.totale_ordine) AS totale_ordini  
+            FROM   (SELECT Sum(list_price * quantity * ( 1 - discount )) AS  
+                           totale_ordine  
+                    FROM   sales.order_items oi  
+                    GROUP  BY oi.order_id) AS t2) AS t4;
 
 Crea un join tra le tabelle degli ordini e dei clienti in modo da associare l'ordine al cliente.
 Seleziona solo le distinte entry.
@@ -30,7 +57,7 @@ Questo punto fai un join delle tabelle sull'order_id e mostra customer_id, nome,
 
     SELECT t1.customer_id, t1.first_name, t1.last_name, t1.order_id, t2.somma
     FROM (
-        SELECT DISTINCT o.order_id, c.customer_id, c.first_name, c.last_name
+        SELECT o.order_id, c.customer_id, c.first_name, c.last_name
         FROM sales.customers c
         JOIN sales.orders o ON c.customer_id = o.customer_id
     ) t1
@@ -39,14 +66,33 @@ Questo punto fai un join delle tabelle sull'order_id e mostra customer_id, nome,
         FROM sales.order_items
         GROUP BY order_id
     ) t2 ON (t1.order_id = t2.order_id)
-    ORDER BY order_id DESC 
+    ORDER BY order_id DESC
     LIMIT 10
 
-### Trova i clienti che non hanno ancora effettuato ordini:
+## Fai la somma dei valori degli ordini per cliente
 
-    SELECT *
-    FROM sales.customers
-    WHERE customer_id NOT IN (SELECT DISTINCT customer_id FROM sales.orders);
+    SELECT f1.first_name,
+           f1.last_name,
+           f1.customer_id,
+           Sum(f1.totale_ordine)
+    FROM   (SELECT t1.first_name,
+                   t1.last_name,
+                   t1.customer_id,
+                   t2.totale_ordine
+            FROM   (SELECT o.order_id,
+                           c.customer_id,
+                           c.first_name,
+                           c.last_name
+                    FROM   sales.customers AS c
+                           JOIN sales.orders AS o
+                             ON c.customer_id = o.customer_id) AS t1
+                   JOIN (SELECT order_id,
+                                Sum(list_price * quantity * discount) AS
+                                totale_ordine
+                         FROM   sales.order_items oi
+                         GROUP  BY oi.order_id) AS t2
+                     ON ( t1.order_id = t2.order_id )) AS f1
+    GROUP  BY f1.customer_id; 
 
 ### Identifica i prodotti più venduti:
 
